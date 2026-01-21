@@ -36,7 +36,7 @@
             grid-template-columns: repeat(10, 1fr);
             grid-template-rows: repeat(8, 1fr);
             gap: 20px;
-            opacity: 0.15;
+            opacity: 0.3; /* УВЕЛИЧЕНА ЯРКОСТ ТУК */
             pointer-events: none;
         }
 
@@ -63,7 +63,7 @@
 
         .input-field {
             background: #FFFFFF;
-            border: 3px solid #E5E7EB; /* Удебелени граници */
+            border: 3px solid #E5E7EB;
             border-radius: 15px;
             padding: 12px;
             width: 100%;
@@ -156,7 +156,6 @@
         const RATE = 1.95583;
         let resultCurrency = 'BGN';
 
-        // Статичен фон
         const bgPattern = document.getElementById('bgPattern');
         for (let i = 0; i < 80; i++) {
             const span = document.createElement('span');
@@ -200,7 +199,6 @@
             }
         }
 
-        // PWA ЛОГИКА
         const manifest = {
             "name": "DualPay Change Calculator",
             "short_name": "DualPay",
@@ -213,7 +211,6 @@
         const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
         document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'manifest', href: URL.createObjectURL(manifestBlob)}));
 
-        // Генериране на икона
         const canvas = document.createElement('canvas');
         canvas.width = 512; canvas.height = 512;
         const ctx = canvas.getContext('2d');
@@ -225,7 +222,6 @@
         document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'icon', href: iconURL}));
         document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'apple-touch-icon', href: iconURL}));
 
-        // Регистрация на Service Worker
         const swCode = `
             self.addEventListener('install', (e) => self.skipWaiting());
             self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
