@@ -7,13 +7,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
     
+    <link rel="manifest" href="data:application/json;base64,ewogICJpZCI6ICJkdWFscGF5LWFwcCIsCiAgIm5hbWUiOiAiRHVhbFBheSBDaGFuZ2UgQ2FsY3VsYXRvciIsCiAgInNob3J0X25hbWUiOiAiRHVhbFBheSIsCiAgInN0YXJ0X3VybCI6ICIuL2luZGV4Lmh0bWwiLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNGMEY0RjgiLAogICJ0aGVtZV9jb2xvciI6ICIjMTBCOTgxIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZsYXRpY29uLmNvbS81MTIvMTAwMDEvMTAwMDE0NzUucG5nIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXQp9">
+
     <style>
         :root { --primary: #10B981; --bg-soft: #F0F4F8; }
-        body { font-family: 'Montserrat', sans-serif; background-color: var(--bg-soft); overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        body { font-family: 'Montserrat', sans-serif; background-color: var(--bg-soft); overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
         h1 { font-family: 'Comfortaa', cursive; }
-        .bg-pattern { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(8, 1fr); gap: 20px; opacity: 0.35; pointer-events: none; }
+        
+        /* Заден план - по-ярки € и лв */
+        .bg-pattern { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(8, 1fr); gap: 20px; opacity: 0.5; pointer-events: none; }
         .symbol { font-size: 2.5rem; font-weight: bold; color: #B0C4DE; display: flex; align-items: center; justify-content: center; }
-        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 40px; border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1); width: 90%; max-width: 420px; padding: 2.5rem; position: relative; }
+        
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 40px; border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1); width: 90%; max-width: 420px; padding: 2.5rem; }
         .input-field { background: #FFFFFF; border: 3px solid #E2E8F0; border-radius: 18px; padding: 14px; width: 100%; font-size: 1.1rem; transition: 0.3s; }
         .input-field:focus { border-color: var(--primary); outline: none; }
         .segmented-control { display: flex; background: #EDF2F7; border-radius: 20px; padding: 6px; border: 2px solid #E2E8F0; }
@@ -28,7 +33,8 @@
     <div class="glass-card text-center">
         <div class="flex flex-col items-center mb-8">
             <div class="w-full py-5 bg-[--primary] rounded-3xl flex items-center justify-center text-white text-4xl font-black shadow-lg mb-4">
-                € ⇄ лв </div>
+                € ⇄ лв
+            </div>
             <h1 class="text-3xl font-bold text-gray-800">DualPay</h1>
             <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Smart Cash Control</p>
         </div>
@@ -77,12 +83,12 @@
         const RATE = 1.95583;
         let resultCurrency = 'BGN';
 
-        // Background symbols (ВЪРНАТИ НА "€" и "лв")
+        // Background symbols - € и лв
         const bgPattern = document.getElementById('bgPattern');
         for (let i = 0; i < 80; i++) {
             const span = document.createElement('span');
             span.className = 'symbol';
-            span.innerText = i % 2 === 0 ? '€' : 'лв'; // ВЪРНАТИ НА "€" и "лв"
+            span.innerText = i % 2 === 0 ? '€' : 'лв';
             bgPattern.appendChild(span);
         }
 
@@ -118,81 +124,12 @@
             } else { resArea.classList.add('hidden'); }
         }
 
-        // --- PWA CONFIGURATION START (подобрено) ---
-        const manifest = {
-            "name": "DualPay Change Calculator",
-            "short_name": "DualPay",
-            "start_url": "./", // Променено на "./" за по-добра съвместимост
-            "display": "standalone",
-            "background_color": "#F0F4F8",
-            "theme_color": "#10B981",
-            "icons": [{
-                "src": "https://cdn-icons-png.flaticon.com/512/10001/10001475.png", // Използваме стабилна икона
-                "sizes": "512x512",
-                "type": "image/png",
-                "purpose": "any maskable" // Добавен purpose за по-добри икони
-            }]
-        };
-        const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-        const manifestURL = URL.createObjectURL(manifestBlob);
-        const manifestLink = document.createElement('link');
-        manifestLink.rel = 'manifest';
-        manifestLink.href = manifestURL;
-        document.head.appendChild(manifestLink);
-
+        // РЕГИСТРАЦИЯ НА SERVICE WORKER ЗА ИКОНАТА
         if ('serviceWorker' in navigator) {
-            const swCode = `
-                const CACHE_NAME = 'dualpay-cache-v2'; // Променен номер на кеша
-                const urlsToCache = [
-                    './',
-                    './index.html',
-                    'https://cdn.tailwindcss.com',
-                    'https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Montserrat:wght@400;600&display=swap',
-                    'https://cdn-icons-png.flaticon.com/512/10001/10001475.png'
-                ];
-
-                self.addEventListener('install', event => {
-                    event.waitUntil(
-                        caches.open(CACHE_NAME)
-                            .then(cache => {
-                                console.log('Opened cache');
-                                return cache.addAll(urlsToCache);
-                            })
-                            .then(() => self.skipWaiting()) // Активира Service Worker веднага
-                    );
-                });
-
-                self.addEventListener('activate', event => {
-                    event.waitUntil(
-                        // Изчиства стари кешове
-                        caches.keys().then(cacheNames => {
-                            return Promise.all(
-                                cacheNames.map(cacheName => {
-                                    if (cacheName !== CACHE_NAME) {
-                                        return caches.delete(cacheName);
-                                    }
-                                })
-                            );
-                        }).then(() => self.clients.claim()) // Поема контрол веднага
-                    );
-                });
-
-                self.addEventListener('fetch', event => {
-                    event.respondWith(
-                        caches.match(event.request)
-                            .then(response => {
-                                return response || fetch(event.request);
-                            })
-                    );
-                });
-            `;
-            const swBlob = new Blob([swCode], {type: 'application/javascript'});
-            const swURL = URL.createObjectURL(swBlob);
-            navigator.serviceWorker.register(swURL)
-                .then(reg => console.log('Service Worker Registered!', reg))
-                .catch(err => console.error('Service Worker registration failed: ', err));
+            const swCode = "self.addEventListener('install', e => e.waitUntil(caches.open('v1').then(c => c.addAll(['./index.html'])))); self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));";
+            const blob = new Blob([swCode], {type: 'application/javascript'});
+            navigator.serviceWorker.register(URL.createObjectURL(blob));
         }
-        // --- PWA CONFIGURATION END ---
     </script>
 </body>
 </html>
