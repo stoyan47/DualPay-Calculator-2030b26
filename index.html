@@ -28,8 +28,7 @@
     <div class="glass-card text-center">
         <div class="flex flex-col items-center mb-8">
             <div class="w-full py-5 bg-[--primary] rounded-3xl flex items-center justify-center text-white text-4xl font-black shadow-lg mb-4">
-                € ⇄ 🦁
-            </div>
+                € ⇄ лв </div>
             <h1 class="text-3xl font-bold text-gray-800">DualPay</h1>
             <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Smart Cash Control</p>
         </div>
@@ -78,12 +77,12 @@
         const RATE = 1.95583;
         let resultCurrency = 'BGN';
 
-        // Background symbols
+        // Background symbols (ВЪРНАТИ НА "€" и "лв")
         const bgPattern = document.getElementById('bgPattern');
         for (let i = 0; i < 80; i++) {
             const span = document.createElement('span');
             span.className = 'symbol';
-            span.innerText = i % 2 === 0 ? '€' : '🦁';
+            span.innerText = i % 2 === 0 ? '€' : 'лв'; // ВЪРНАТИ НА "€" и "лв"
             bgPattern.appendChild(span);
         }
 
@@ -119,19 +118,19 @@
             } else { resArea.classList.add('hidden'); }
         }
 
-        // --- PWA CONFIGURATION START ---
+        // --- PWA CONFIGURATION START (подобрено) ---
         const manifest = {
             "name": "DualPay Change Calculator",
             "short_name": "DualPay",
-            "start_url": "./index.html",
+            "start_url": "./", // Променено на "./" за по-добра съвместимост
             "display": "standalone",
             "background_color": "#F0F4F8",
             "theme_color": "#10B981",
             "icons": [{
-                "src": "https://cdn-icons-png.flaticon.com/512/10001/10001475.png",
+                "src": "https://cdn-icons-png.flaticon.com/512/10001/10001475.png", // Използваме стабилна икона
                 "sizes": "512x512",
                 "type": "image/png",
-                "purpose": "any"
+                "purpose": "any maskable" // Добавен purpose за по-добри икони
             }]
         };
         const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
@@ -143,12 +142,55 @@
 
         if ('serviceWorker' in navigator) {
             const swCode = `
-                self.addEventListener('install', e => self.skipWaiting());
-                self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
+                const CACHE_NAME = 'dualpay-cache-v2'; // Променен номер на кеша
+                const urlsToCache = [
+                    './',
+                    './index.html',
+                    'https://cdn.tailwindcss.com',
+                    'https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Montserrat:wght@400;600&display=swap',
+                    'https://cdn-icons-png.flaticon.com/512/10001/10001475.png'
+                ];
+
+                self.addEventListener('install', event => {
+                    event.waitUntil(
+                        caches.open(CACHE_NAME)
+                            .then(cache => {
+                                console.log('Opened cache');
+                                return cache.addAll(urlsToCache);
+                            })
+                            .then(() => self.skipWaiting()) // Активира Service Worker веднага
+                    );
+                });
+
+                self.addEventListener('activate', event => {
+                    event.waitUntil(
+                        // Изчиства стари кешове
+                        caches.keys().then(cacheNames => {
+                            return Promise.all(
+                                cacheNames.map(cacheName => {
+                                    if (cacheName !== CACHE_NAME) {
+                                        return caches.delete(cacheName);
+                                    }
+                                })
+                            );
+                        }).then(() => self.clients.claim()) // Поема контрол веднага
+                    );
+                });
+
+                self.addEventListener('fetch', event => {
+                    event.respondWith(
+                        caches.match(event.request)
+                            .then(response => {
+                                return response || fetch(event.request);
+                            })
+                    );
+                });
             `;
             const swBlob = new Blob([swCode], {type: 'application/javascript'});
             const swURL = URL.createObjectURL(swBlob);
-            navigator.serviceWorker.register(swURL);
+            navigator.serviceWorker.register(swURL)
+                .then(reg => console.log('Service Worker Registered!', reg))
+                .catch(err => console.error('Service Worker registration failed: ', err));
         }
         // --- PWA CONFIGURATION END ---
     </script>
