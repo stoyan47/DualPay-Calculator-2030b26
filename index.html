@@ -9,14 +9,14 @@
     
     <style>
         :root {
-            --primary: #1E3A8A;
-            --bg-soft: #F3F0FA;
+            --primary: #10B981; /* Зелен цвят */
+            --bg-soft: #F3F0FA; /* Светло лавандулово лилаво */
         }
 
         body {
             font-family: 'Montserrat', sans-serif;
             background-color: var(--bg-soft);
-            overflow: hidden;
+            overflow: hidden; /* За статичен фон */
             height: 100vh;
             display: flex;
             align-items: center;
@@ -25,29 +25,31 @@
 
         h1, h2 { font-family: 'Comfortaa', cursive; }
 
-        /* Динамичен фон */
+        /* Статичен фон с € и лв */
         .bg-pattern {
             position: fixed;
             top: 0;
             left: 0;
-            width: 150%;
-            height: 150%;
+            width: 100%;
+            height: 100%;
             z-index: -1;
             display: grid;
-            grid-template-columns: repeat(10, 1fr);
+            grid-template-columns: repeat(12, 1fr); /* Повече колони за по-плътен вид */
+            grid-template-rows: repeat(8, 1fr);
             gap: 20px;
-            opacity: 0.05;
+            opacity: 0.1; /* Едва забележими */
             pointer-events: none;
-            animation: float 20s linear infinite;
         }
 
-        @keyframes float {
-            0% { transform: translate(0, 0) rotate(0deg) scale(1); }
-            50% { transform: translate(-5%, -5%) rotate(5deg) scale(1.1); }
-            100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+        .symbol { 
+            font-size: 2.5rem; /* По-големи символи */
+            font-weight: bold; 
+            color: #C0D8F0; /* Светло син цвят, за да не се бърка с акцента */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .symbol { font-size: 2rem; font-weight: bold; color: var(--primary); }
 
         /* Glassmorphism */
         .glass-card {
@@ -72,7 +74,7 @@
         .input-field:focus {
             border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 15px rgba(30, 58, 138, 0.2);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
         }
 
         .segmented-control {
@@ -115,10 +117,10 @@
 
     <div class="glass-card">
         <div class="flex flex-col items-center mb-6">
-            <div class="w-16 h-16 bg-[#1E3A8A] rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-lg mb-2">
+            <div class="w-20 h-20 bg-[--primary] rounded-2xl flex items-center justify-center text-white text-3xl font-bold shadow-lg mb-2" style="font-family: 'Comfortaa', cursive; font-weight: 900;">
                 € ⇄ лв
             </div>
-            <h1 class="text-2xl font-bold text-[#1E3A8A]">DualPay</h1>
+            <h1 class="text-2xl font-bold text-[--primary]">DualPay</h1>
         </div>
 
         <div class="space-y-4">
@@ -155,7 +157,7 @@
 
                 <div class="text-center">
                     <div class="text-gray-500 text-sm">Дължимо ресто:</div>
-                    <div id="changeMain" class="text-3xl font-bold text-[#1E3A8A] my-1">0.00 лв</div>
+                    <div id="changeMain" class="text-3xl font-bold text-[--primary] my-1">0.00 лв</div>
                     <div id="changeSub" class="text-gray-400 text-sm italic">0.00 €</div>
                 </div>
             </div>
@@ -163,7 +165,7 @@
 
         <footer class="mt-8 text-center text-[10px] text-gray-400">
             <p>Курс: 1 EUR = 1.95583 BGN</p>
-            <p class="font-semibold">© Gemini AI Partner</p>
+            <p class="font-semibold">© Stoyan Pehlivanov</p>
         </footer>
     </div>
 
@@ -171,12 +173,13 @@
         const RATE = 1.95583;
         let resultCurrency = 'BGN';
 
-        // Генериране на фон
+        // Генериране на статичен фон
         const bgPattern = document.getElementById('bgPattern');
+        const symbols = ['€', 'лв', '🪙', '💵']; // Добавих още символи за разнообразие
         for (let i = 0; i < 100; i++) {
             const span = document.createElement('span');
             span.className = 'symbol';
-            span.innerText = i % 2 === 0 ? '€' : 'лв';
+            span.innerText = symbols[Math.floor(Math.random() * symbols.length)]; // Избира произволен символ
             bgPattern.appendChild(span);
         }
 
@@ -223,6 +226,12 @@
             const mainEl = document.getElementById('changeMain');
             const subEl = document.getElementById('changeSub');
 
+            if (changeBGN < 0) { // Ако рестото е отрицателно, покажи 0
+                 mainEl.innerText = "0.00 " + (resultCurrency === 'BGN' ? 'лв' : '€');
+                 subEl.innerText = "0.00 " + (resultCurrency === 'BGN' ? '€' : 'лв');
+                 return;
+            }
+
             if (resultCurrency === 'BGN') {
                 mainEl.innerText = changeBGN.toFixed(2) + ' лв';
                 subEl.innerText = (changeBGN / RATE).toFixed(2) + ' €';
@@ -234,12 +243,12 @@
 
         // PWA SETUP (Service Worker & Manifest)
         const manifest = {
-            name: "DualPay Change",
+            name: "DualPay Change Calculator",
             short_name: "DualPay",
             start_url: ".",
             display: "standalone",
             background_color: "#F3F0FA",
-            theme_color: "#1E3A8A",
+            theme_color: "#10B981", /* Също зелен */
             icons: [{ src: "icon.png", sizes: "512x512", type: "image/png" }]
         };
 
@@ -250,31 +259,65 @@
         link.href = manifestURL;
         document.head.appendChild(link);
 
-        // Динамична икона чрез Canvas
+        // Динамична икона чрез Canvas (ще се използва за PWA инсталация)
         const canvas = document.createElement('canvas');
         canvas.width = 512; canvas.height = 512;
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#1E3A8A';
+        ctx.fillStyle = '#10B981'; /* Зелен цвят за иконата */
         ctx.beginPath();
         ctx.roundRect(0, 0, 512, 512, 100);
         ctx.fill();
         ctx.fillStyle = 'white';
-        ctx.font = 'bold 80px Comfortaa, sans-serif';
+        ctx.font = 'bold 100px Comfortaa, sans-serif'; /* По-голям и удебелен шрифт за иконата */
         ctx.textAlign = 'center';
-        ctx.fillText('€ ⇄ лв', 256, 280);
+        ctx.fillText('€⇄лв', 256, 280); /* Променен символ */
         
         const iconURL = canvas.toDataURL();
-        const iconLink = document.createElement('link');
-        iconLink.rel = 'apple-touch-icon';
-        iconLink.href = iconURL;
-        document.head.appendChild(iconLink);
+        // Добавяме иконата както за apple-touch-icon, така и за стандартна икона
+        const iconLinkApple = document.createElement('link');
+        iconLinkApple.rel = 'apple-touch-icon';
+        iconLinkApple.href = iconURL;
+        document.head.appendChild(iconLinkApple);
+
+        const iconLinkFavicon = document.createElement('link');
+        iconLinkFavicon.rel = 'icon';
+        iconLinkFavicon.href = iconURL;
+        document.head.appendChild(iconLinkFavicon);
+
 
         // Service Worker
-        const swCode = `self.addEventListener('fetch', function(e) { e.respondWith(fetch(e.request)); });`;
+        const swCode = `
+            self.addEventListener('install', function(e) {
+                e.waitUntil(
+                    caches.open('dualpay-cache-v1').then(function(cache) {
+                        return cache.addAll([
+                            './',
+                            'index.html',
+                            'https://cdn.tailwindcss.com',
+                            'https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Montserrat:wght@400;600&display=swap'
+                        ]);
+                    })
+                );
+            });
+
+            self.addEventListener('fetch', function(e) {
+                e.respondWith(
+                    caches.match(e.request).then(function(response) {
+                        return response || fetch(e.request);
+                    })
+                );
+            });
+        `;
         const swBlob = new Blob([swCode], {type: 'application/javascript'});
         const swURL = URL.createObjectURL(swBlob);
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register(swURL);
+            navigator.serviceWorker.register(swURL)
+                .then(function(reg) {
+                    console.log('Service Worker Registered!', reg);
+                })
+                .catch(function(err) {
+                    console.error('Service Worker registration failed: ', err);
+                });
         }
     </script>
 </body>
